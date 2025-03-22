@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chessboard.js with Chess.js</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard-1.0.0.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .board {
+            margin: 20px auto;
+            width: 400px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chessboard.js with Chess.js</h1>
+    <div id="board1" class="board"></div>
+
+    <script>
+        // Create a new chess game object
+        var board, game = new Chess();
+
+        // Initialize Chessboard.js
+        board = Chessboard('board1', {
+            draggable: true,
+            dropOffBoard: 'trash',
+            sparePieces: true,
+            onDrop: handleMove,
+        });
+
+        // Set the board to the starting position
+        board.position('start');
+
+        // Handle a move when a piece is dropped
+        function handleMove (source, target) {
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Promote to a queen if needed
+            });
+
+            // If the move is illegal, return the piece back to its original position
+            if (move === null) {
+                return 'snapback';
+            }
+
+            // Update the board position
+            renderMoveHistory(game.history());
+            renderMoveHistory(game.history().join(' '));
+
+            // Update the board's game state
+            renderStatus();
+        }
+
+        // Render move history
+        function renderMoveHistory(moves) {
+            var movesEl = $('#move-history').empty();
+            moves.forEach(function(move) {
+                movesEl.append('<span>' + move + '</span>');
+            });
+        }
+
+        // Render the game status (check, checkmate, etc.)
+        function renderStatus() {
+            var status = '';
+            var moveColor = 'White';
+            if (game.game_over()) {
+                status = 'Game over';
+            } else if (game.in_check()) {
+                status = moveColor + ' is in check';
+            }
+            $('#status').html(status);
+        }
+    </script>
+</body>
+</html>
